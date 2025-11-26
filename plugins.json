@@ -8,7 +8,6 @@
     "status": 1,
     "tvTypes": ["Movie", "TvSeries", "AsianDrama"],
     "language": "en",
-    "iconUrl": "https://thenkiri.com/wp-content/uploads/2023/09/cropped-nkiri-logo-1-32x32.png",
     "repositoryUrl": "https://github.com/Kali452345/TestPlugins-master"
   }
 ]
