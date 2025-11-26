@@ -1,0 +1,8 @@
+{
+  "name": "TheNkiri CloudStream Repository",
+  "description": "Provider for TheNkiri.com - Download movies, TV series, Korean dramas, Japanese dramas, Chinese dramas, and Bollywood films",
+  "manifestVersion": 1,
+  "pluginLists": [
+    "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/plugins.json"
+  ]
+}

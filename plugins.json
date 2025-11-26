@@ -1,0 +1,14 @@
+[
+  {
+    "name": "TheNkiri",
+    "url": "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/builds/TheNkiriProvider.cs3",
+    "version": 1,
+    "description": "TheNkiri.com provider for movies, TV series, Korean dramas, Japanese dramas, Chinese dramas, and Bollywood films",
+    "authors": ["YourName"],
+    "status": 1,
+    "tvTypes": ["Movie", "TvSeries", "AsianDrama"],
+    "language": "en",
+    "iconUrl": "https://thenkiri.com/wp-content/uploads/2023/09/cropped-nkiri-logo-1-32x32.png",
+    "repositoryUrl": "https://github.com/YOUR_USERNAME/YOUR_REPO"
+  }
+]
