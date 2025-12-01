@@ -15,53 +15,35 @@ class TheNkiriProvider : MainAPI() {
         TvType.AsianDrama
     )
 
-    override val mainPage = mainPageOf(
-        "$mainUrl/" to "Home",
-        "$mainUrl/korean-drama-menu/" to "Korean Dramas",
-        "$mainUrl/movies-menu/" to "Movies",
-        "$mainUrl/tv-series-menu/" to "TV Series",
-        "$mainUrl/japanese-drama-menu/" to "Japanese Drama",
-        "$mainUrl/chinese-drama-menu/" to "Chinese Drama",
-        "$mainUrl/bollywood-menu/" to "Bollywood"
-    )
-
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
-        val document = app.get(request.data + if (page > 1) "page/$page/" else "").document
+        val document = app.get("$mainUrl/").document
+        val sections = mutableListOf<HomePageList>()
         
-        // Handle homepage - return multiple sections
-        if (request.data == mainUrl || request.data == "$mainUrl/") {
-            val sections = mutableListOf<HomePageList>()
-            
-            // New Dramas Section
-            val dramaSection = document.select("h3:contains(New Dramas Uploads), h3:contains(New Drama Uploads)")
-                .firstOrNull()?.parent()?.parent()?.select("article.eael-grid-post")
-                ?.mapNotNull { it.toSearchResponse() }
-            if (dramaSection?.isNotEmpty() == true) {
-                sections.add(HomePageList("New Dramas", dramaSection))
-            }
-            
-            // New Movies Section
-            val movieSection = document.select("h3:contains(New Movie Uploads)")
-                .firstOrNull()?.parent()?.parent()?.select("article.eael-grid-post")
-                ?.mapNotNull { it.toSearchResponse() }
-            if (movieSection?.isNotEmpty() == true) {
-                sections.add(HomePageList("New Movies", movieSection))
-            }
-            
-            // New Series Section
-            val seriesSection = document.select("h3:contains(New Series Uploads)")
-                .firstOrNull()?.parent()?.parent()?.select("article.eael-grid-post")
-                ?.mapNotNull { it.toSearchResponse() }
-            if (seriesSection?.isNotEmpty() == true) {
-                sections.add(HomePageList("New Series", seriesSection))
-            }
-            
-            return newHomePageResponse(sections, hasNext = false)
-        } else {
-            // Category pages - single list  
-            val home = document.select("article.eael-grid-post, article.gridlove-post, article").mapNotNull { it.toSearchResponse() }
-            return newHomePageResponse(request.name, home, hasNext = home.isNotEmpty())
+        // New Dramas Section
+        val dramaSection = document.select("h3:contains(New Dramas Uploads), h3:contains(New Drama Uploads)")
+            .firstOrNull()?.parent()?.parent()?.select("article.eael-grid-post")
+            ?.mapNotNull { it.toSearchResponse() }
+        if (dramaSection?.isNotEmpty() == true) {
+            sections.add(HomePageList("New Dramas", dramaSection))
         }
+        
+        // New Movies Section
+        val movieSection = document.select("h3:contains(New Movie Uploads)")
+            .firstOrNull()?.parent()?.parent()?.select("article.eael-grid-post")
+            ?.mapNotNull { it.toSearchResponse() }
+        if (movieSection?.isNotEmpty() == true) {
+            sections.add(HomePageList("New Movies", movieSection))
+        }
+        
+        // New Series Section
+        val seriesSection = document.select("h3:contains(New Series Uploads)")
+            .firstOrNull()?.parent()?.parent()?.select("article.eael-grid-post")
+            ?.mapNotNull { it.toSearchResponse() }
+        if (seriesSection?.isNotEmpty() == true) {
+            sections.add(HomePageList("New Series", seriesSection))
+        }
+        
+        return newHomePageResponse(sections, hasNext = false)
     }
 
     private fun Element.toSearchResponse(): SearchResponse? {
