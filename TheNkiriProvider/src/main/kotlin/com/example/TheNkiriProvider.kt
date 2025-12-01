@@ -16,9 +16,7 @@ class TheNkiriProvider : MainAPI() {
     )
 
     override val mainPage = mainPageOf(
-        "$mainUrl/" to "New Dramas",
-        "$mainUrl/" to "New Movies", 
-        "$mainUrl/" to "New Series",
+        "$mainUrl/" to "Home",
         "$mainUrl/korean-drama-menu/" to "Korean Dramas",
         "$mainUrl/movies-menu/" to "Movies",
         "$mainUrl/tv-series-menu/" to "TV Series",
@@ -30,31 +28,40 @@ class TheNkiriProvider : MainAPI() {
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
         val document = app.get(request.data + if (page > 1) "page/$page/" else "").document
         
-        // Handle homepage sections differently
-        val home = if (request.data == mainUrl || request.data == "$mainUrl/") {
-            // Homepage - extract specific sections
-            when (request.name) {
-                "New Dramas" -> {
-                    document.select("h3:contains(New Dramas Uploads), h3:contains(New Drama Uploads)")
-                        .firstOrNull()?.parent()?.select("article") ?: listOf()
-                }
-                "New Movies" -> {
-                    document.select("h3:contains(New Movie Uploads)")
-                        .firstOrNull()?.parent()?.select("article") ?: listOf()
-                }
-                "New Series" -> {
-                    document.select("h3:contains(New Series Uploads)")
-                        .firstOrNull()?.parent()?.select("article") ?: listOf()
-                }
-                else -> document.select("article")
+        // Handle homepage - return multiple sections
+        if (request.data == mainUrl || request.data == "$mainUrl/") {
+            val sections = mutableListOf<HomePageList>()
+            
+            // New Dramas Section
+            val dramaSection = document.select("h3:contains(New Dramas Uploads), h3:contains(New Drama Uploads)")
+                .firstOrNull()?.parent()?.select("article")
+                ?.mapNotNull { it.toSearchResponse() }
+            if (dramaSection?.isNotEmpty() == true) {
+                sections.add(HomePageList("New Dramas", dramaSection))
             }
+            
+            // New Movies Section
+            val movieSection = document.select("h3:contains(New Movie Uploads)")
+                .firstOrNull()?.parent()?.select("article")
+                ?.mapNotNull { it.toSearchResponse() }
+            if (movieSection?.isNotEmpty() == true) {
+                sections.add(HomePageList("New Movies", movieSection))
+            }
+            
+            // New Series Section
+            val seriesSection = document.select("h3:contains(New Series Uploads)")
+                .firstOrNull()?.parent()?.select("article")
+                ?.mapNotNull { it.toSearchResponse() }
+            if (seriesSection?.isNotEmpty() == true) {
+                sections.add(HomePageList("New Series", seriesSection))
+            }
+            
+            return newHomePageResponse(sections, hasNext = false)
         } else {
-            // Category pages
-            document.select("article")
+            // Category pages - single list
+            val home = document.select("article").mapNotNull { it.toSearchResponse() }
+            return newHomePageResponse(request.name, home, hasNext = home.isNotEmpty())
         }
-        
-        val searchResults = home.mapNotNull { it.toSearchResponse() }
-        return newHomePageResponse(request.name, searchResults, hasNext = searchResults.isNotEmpty())
     }
 
     private fun Element.toSearchResponse(): SearchResponse? {
