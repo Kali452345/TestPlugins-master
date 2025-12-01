@@ -34,7 +34,7 @@ class TheNkiriProvider : MainAPI() {
             
             // New Dramas Section
             val dramaSection = document.select("h3:contains(New Dramas Uploads), h3:contains(New Drama Uploads)")
-                .firstOrNull()?.parent()?.select("article")
+                .firstOrNull()?.parent()?.parent()?.select("article.eael-grid-post")
                 ?.mapNotNull { it.toSearchResponse() }
             if (dramaSection?.isNotEmpty() == true) {
                 sections.add(HomePageList("New Dramas", dramaSection))
@@ -42,7 +42,7 @@ class TheNkiriProvider : MainAPI() {
             
             // New Movies Section
             val movieSection = document.select("h3:contains(New Movie Uploads)")
-                .firstOrNull()?.parent()?.select("article")
+                .firstOrNull()?.parent()?.parent()?.select("article.eael-grid-post")
                 ?.mapNotNull { it.toSearchResponse() }
             if (movieSection?.isNotEmpty() == true) {
                 sections.add(HomePageList("New Movies", movieSection))
@@ -50,7 +50,7 @@ class TheNkiriProvider : MainAPI() {
             
             // New Series Section
             val seriesSection = document.select("h3:contains(New Series Uploads)")
-                .firstOrNull()?.parent()?.select("article")
+                .firstOrNull()?.parent()?.parent()?.select("article.eael-grid-post")
                 ?.mapNotNull { it.toSearchResponse() }
             if (seriesSection?.isNotEmpty() == true) {
                 sections.add(HomePageList("New Series", seriesSection))
@@ -58,17 +58,22 @@ class TheNkiriProvider : MainAPI() {
             
             return newHomePageResponse(sections, hasNext = false)
         } else {
-            // Category pages - single list
-            val home = document.select("article").mapNotNull { it.toSearchResponse() }
+            // Category pages - single list  
+            val home = document.select("article.eael-grid-post, article.gridlove-post, article").mapNotNull { it.toSearchResponse() }
             return newHomePageResponse(request.name, home, hasNext = home.isNotEmpty())
         }
     }
 
     private fun Element.toSearchResponse(): SearchResponse? {
-        val title = this.selectFirst("h2.entry-title a")?.text()?.trim() ?: return null
-        val href = fixUrlNull(this.selectFirst("h2.entry-title a")?.attr("href")) ?: return null
+        // Try new format first (eael-grid-post)
+        val titleElement = this.selectFirst("h5.eael-entry-title a") ?: this.selectFirst("h2.entry-title a")
+        val title = titleElement?.text()?.trim() ?: return null
+        val href = fixUrlNull(titleElement.attr("href")) ?: return null
+        
+        // Try new format image first, then old format
         val posterUrl = fixUrlNull(
-            this.selectFirst("img")?.attr("src") 
+            this.selectFirst("div.eael-entry-thumbnail img")?.attr("src")
+            ?: this.selectFirst("img")?.attr("src") 
             ?: this.selectFirst("img")?.attr("data-src")
         )
         
