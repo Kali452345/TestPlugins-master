@@ -15,6 +15,10 @@ class TheNkiriProvider : MainAPI() {
         TvType.AsianDrama
     )
 
+    override val mainPage = mainPageOf(
+        "$mainUrl/" to "Home"
+    )
+
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
         val document = app.get("$mainUrl/").document
         val sections = mutableListOf<HomePageList>()
